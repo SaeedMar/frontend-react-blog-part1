@@ -1,26 +1,51 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from "react-router-dom";
-import Posts from "../constants/data.json";
-import {dateFormatter} from "../Helpers/dateFormatter.js";
+import axios from "axios";
 
 const BlogPostDetail = () => {
     const { id } = useParams();
-    // Convert id from string to number for comparison
-    const post = Posts.find(post => post.id === Number(id));
+    const [post, setPost] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    if (!post) {
-        return <h2>Post Not Found</h2>;
-    }
+    useEffect(() => {
+        const fetchPost = async () => {
+            setLoading(true);
+            setError('');
+            try {
+                const response = await axios.get(`http://localhost:3000/posts/${id}`);
+                setPost(response.data);
+                console.log("Fetched post:", response.data);
+            } catch (err) {
+                console.error("Error fetching post:", err.message);
+                setError("Er is een probleem met het ophalen van de post. Probeer het later opnieuw.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPost();
+    }, [id]);
 
     return (
-        <div>
-            <h1>{post.title} ({post.readTime} minuten)</h1>
-            <h2>{post.subtitle}</h2>
-            <p>Geschreven door {post.author} op {dateFormatter(post.created)}</p>
-            <p>{post.content}</p>
-            <p>{post.comments} reacties - {post.shares} keer gedeeld</p>
-            <Link to="/Overzicht">Terug naar de overzichtspagina</Link>
-        </div>
+        <>
+            <h1>Post Detail</h1>
+            {loading && <p>Loading...</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {post ? (
+                <div>
+                    <h2>{post.title}</h2>
+                    <h3>{post.subtitle}</h3>
+                    <p>{post.content}</p>
+                    <p>Geschreven door {post.author}</p>
+                    <p>Aangemaakt op: {new Date(post.created).toLocaleDateString()}</p>
+                    <p>Leestijd: {post.readTime} minuten</p>
+                    <p>{post.comments} reacties - {post.shares} keer gedeeld</p>
+                    <Link to="/Overzicht">Terug naar de overzichtspagina</Link>
+                </div>
+            ) : (
+                !loading && <p>Geen post beschikbaar.</p>
+            )}
+        </>
     );
 };
 
