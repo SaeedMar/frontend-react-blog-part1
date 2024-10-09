@@ -11,7 +11,7 @@ import BlogPostDetail from "./components/BlogPostDetail.jsx";
 import BlogPostForm from "./components/BlogPostForm.jsx";
 import {useState} from "react";
 import axios from "axios";
-
+// Ik heb echt geen tijd gehaad om styling toe te voegen , en nu alleen 30 minuten de tijd om te resten
 function App() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
